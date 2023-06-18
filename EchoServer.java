@@ -2,9 +2,10 @@
 // "Object Oriented Software Engineering" and is issued under the open-source
 // license found at www.lloseng.com 
 
+import java.io.*;
+import java.util.Scanner;
 
 import ocsf.server.*;
-
 /**
  * This class overrides some of the methods in the abstract 
  * superclass in order to give more functionality to the server.
@@ -17,15 +18,17 @@ import ocsf.server.*;
  */
 public class EchoServer extends AbstractServer 
 {
+	public static int z;
   //Class variables *************************************************
-  
+	Scanner fromConsole;
   /**
    * The default port to listen on.
    */
   final public static int DEFAULT_PORT = 5555;
-  
+  int nbr=0;
   //Constructors ****************************************************
-  
+  String loginID="";
+  String message;
   /**
    * Constructs an instance of the echo server.
    *
@@ -38,6 +41,13 @@ public class EchoServer extends AbstractServer
 
   
   //Instance methods ************************************************
+  protected void clientConnected(ConnectionToClient client) {
+	  System.out.println("Welcome to our server...");
+  }
+  synchronized protected void clientException(
+		    ConnectionToClient client, Throwable exception) {
+	  System.out.println("Have a nice day.");
+	  }
   
   /**
    * This method handles any messages received from the client.
@@ -48,7 +58,21 @@ public class EchoServer extends AbstractServer
   public void handleMessageFromClient
     (Object msg, ConnectionToClient client)
   {
+	  if(nbr==0) {
+		  message=(String) msg;
+		  for(int x=9;x<message.length();x++) {		  
+			  if(message.charAt(x)=='>') {
+				  break;
+			  }
+			  loginID= loginID+message.charAt(x);
+		  }
+		  nbr++;
+		}
+	  
+	  
+	  
     System.out.println("Message received: " + msg + " from " + client);
+    System.out.println('<'+loginID+'>' + " has logged on...");
     this.sendToAllClients(msg);
   }
     
@@ -70,6 +94,19 @@ public class EchoServer extends AbstractServer
   {
     System.out.println
       ("Server has stopped listening for connections.");
+  }
+  protected void serverClosed()
+  {
+    System.out.println
+      ("the server closed...");
+    //System.out.println
+    //("Server has stopped listening for connections.");
+  }
+  public void handleMessageFromServerUI(Object msg) 
+  {
+	  System.out.println("> "+msg);
+	  this.sendToAllClients(msg);
+	  
   }
   
   //Class methods ***************************************************
